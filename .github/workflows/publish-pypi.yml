@@ -1,0 +1,53 @@
+name: Publish PyPI
+
+# Human-gated: dispatch with a published (non-draft) release tag. Publishes
+# the exact smoke-tested wheels from the release assets — never rebuilds.
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
+        required: true
+        description: 'Published release tag (vX.Y.Z)'
+
+permissions: {}
+
+concurrency:
+  group: publish-pypi
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Migration belt+braces: unset repo variable = hard no-op. Flip only at public launch.
+    if: vars.PYPI_PUBLISH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    # Settings follow-up: create the pypi environment with required reviewers.
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Validate tag and release state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag_name }}
+        run: |
+          set -euo pipefail
+          echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          test "$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = "false"
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag_name }}
+        run: gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.whl' --pattern SHA256SUMS --dir staging
+      - name: Verify checksums
+        run: |
+          set -euo pipefail
+          (cd staging && grep '\.whl$' SHA256SUMS | sha256sum -c -)
+          test "$(ls staging/*.whl | wc -l)" -eq 4
+          # publish action twine-checks every file in packages-dir
+          rm staging/SHA256SUMS
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: staging
+          skip-existing: true

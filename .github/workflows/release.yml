@@ -1,0 +1,95 @@
+name: Release
+
+# Human-gated: dispatch builds wheels from main, verifies them against
+# bin/metadata.json, smoke-tests on real runners, and stages a DRAFT
+# release. Publishing the draft is a manual UI step.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - id: version
+        run: echo "version=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" >> "$GITHUB_OUTPUT"
+      - name: Build 4 wheels
+        run: |
+          pip install build
+          for plat in manylinux2014_x86_64 manylinux2014_aarch64 macosx_11_0_x86_64 macosx_11_0_arm64; do
+            PPLX_SDK_PLATFORM=$plat python -m build --wheel --outdir staging .
+          done
+      - name: Verify wheel set against bin/metadata.json
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          ls staging | LC_ALL=C sort | diff - <(for t in macosx_11_0_arm64 macosx_11_0_x86_64 manylinux2014_aarch64 manylinux2014_x86_64; do
+            echo "pplx_srch_sdk-${VERSION}-cp312-abi3-${t}.whl"
+          done)
+          for t in manylinux2014_x86_64 manylinux2014_aarch64 macosx_11_0_x86_64 macosx_11_0_arm64; do
+            unzip -p "staging/pplx_srch_sdk-${VERSION}-cp312-abi3-${t}.whl" pplx_sdk/pplx_sdk.abi3.so \
+              | sha256sum | cut -d' ' -f1 \
+              | diff - <(jq -r ".sha256s[\"$t\"]" bin/metadata.json)
+          done
+          (cd staging && sha256sum *.whl > SHA256SUMS)
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-assets
+          path: staging/
+
+  smoke:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        # No Intel-mac runner exists: macosx_11_0_x86_64 ships checksum-verified only.
+        include:
+          - runner: ubuntu-latest
+            tag: manylinux2014_x86_64
+          - runner: ubuntu-24.04-arm
+            tag: manylinux2014_aarch64
+          - runner: macos-15
+            tag: macosx_11_0_arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: release-assets
+          path: staging
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - run: pip install "staging/pplx_srch_sdk-${{ needs.build.outputs.version }}-cp312-abi3-${{ matrix.tag }}.whl"
+      - run: python -c "import pplx_sdk; assert pplx_sdk.__version__ == '${{ needs.build.outputs.version }}', pplx_sdk.__version__"
+
+  draft-release:
+    needs: [build, smoke]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: release-assets
+          path: staging
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          gh release create "v${VERSION}" staging/*.whl staging/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --draft --title "v${VERSION}" --generate-notes
