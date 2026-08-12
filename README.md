@@ -10,8 +10,8 @@ Perplexity-internal source.
 pip install pplx-srch-sdk
 ```
 
-CPython 3.12+ on Linux (x86_64, aarch64) and macOS. The import name is
-`pplx_sdk`.
+CPython 3.12+ on Linux (x86_64, aarch64) and macOS. The import name matches:
+`import pplx_srch_sdk`.
 
 ## Quick start
 
@@ -19,13 +19,13 @@ Get an API key at [perplexity.ai/account/api](https://www.perplexity.ai/account/
 and export it as `PERPLEXITY_API_KEY`.
 
 ```python
-import pplx_sdk
+import pplx_srch_sdk
 
-hits = pplx_sdk.search.web("rust async runtimes", limit=5)
+hits = pplx_srch_sdk.search.web("rust async runtimes", limit=5)
 for hit in hits:
     print(hit.title, hit.url)
 
-snippets = pplx_sdk.content.snippets(
+snippets = pplx_srch_sdk.content.snippets(
     query="rust async runtimes",
     urls=[hit.url for hit in hits],
 )
@@ -34,11 +34,11 @@ for s in snippets:
 ```
 
 An async client with the same surface is available as
-`pplx_sdk.AsyncPplxClient`.
+`pplx_srch_sdk.AsyncPplxClient`.
 
 ## Development
 
-The Python wrapper (`src/pplx_sdk/`) is maintained in this repository; PRs
+The Python wrapper (`src/pplx_srch_sdk/`) is maintained in this repository; PRs
 welcome. `bin/` holds the compiled core, delivered prebuilt by Perplexity's
 internal release pipeline — never edited by hand. `pip install .` packs the
 host platform's `.so` via `scripts/hatch_build.py`; wheels for any supported platform

@@ -8,7 +8,7 @@ from typing import Any
 
 import orjson
 
-from pplx_sdk.utils._output_dir import resolve_output_root
+from pplx_srch_sdk.utils._output_dir import resolve_output_root
 
 _MISSING = object()
 DEFAULT_PREVIEW_LIMIT = 5
@@ -27,7 +27,7 @@ def _default(value: Any) -> Any:  # noqa: ANN401
         return value.isoformat()
     if isinstance(value, BaseException):
         payload: dict[str, Any] = {"type": type(value).__name__, "message": str(value)}
-        # Preserve fields exposed by pplx_sdk APIError-like exceptions.
+        # Preserve fields exposed by pplx_srch_sdk APIError-like exceptions.
         for attr in ("status_code", "body"):
             attr_value = getattr(value, attr, _MISSING)
             if attr_value is not _MISSING:
@@ -105,7 +105,7 @@ def save_and_print(
     """Save a one-off SDK result to JSON and print it with a ``saved_to`` path."""
     payload = _output_envelope(obj)
     path = output_file_name(
-        "pplx_sdk",
+        "pplx_srch_sdk",
         uuid.uuid4().hex[:8],
         rd=output_dir,
         timestamp=timestamp,

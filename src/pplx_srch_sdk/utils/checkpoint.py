@@ -5,7 +5,7 @@ from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any
 
-from pplx_sdk.utils.jsonl import read_jsonl, write_jsonl
+from pplx_srch_sdk.utils.jsonl import read_jsonl, write_jsonl
 
 
 def _is_valid_key(key: str) -> bool:

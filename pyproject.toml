@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pplx_srch_sdk"
-version = "0.1.1"
+version = "0.2.0"
 description = "Perplexity Search SDK for Python — web search and content snippets"
 readme = "README.md"
 license = "Apache-2.0"
@@ -23,9 +23,9 @@ classifiers = [
 Homepage = "https://github.com/perplexityai/perplexity-search-sdk"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pplx_sdk"]
+packages = ["src/pplx_srch_sdk"]
 # The cdylib is copied in by the build hook; keep it in the wheel even if VCS-ignored.
-artifacts = ["src/pplx_sdk/pplx_sdk.abi3.so"]
+artifacts = ["src/pplx_srch_sdk/pplx_sdk.abi3.so"]
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 path = "scripts/hatch_build.py"

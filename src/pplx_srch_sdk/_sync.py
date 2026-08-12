@@ -58,7 +58,7 @@ def _run(coro: Any) -> Any:  # noqa: ANN401
     if _loop_pid is not None and _loop_pid != os.getpid():
         coro.close()
         raise RuntimeError(
-            "pplx_sdk sync facade is not usable in forked children; "
+            "pplx_srch_sdk sync facade is not usable in forked children; "
             "use AsyncPplxClient directly in the child process"
         )
     fut = asyncio.run_coroutine_threadsafe(coro, _get_loop())
@@ -170,7 +170,7 @@ def _make_search_many(method_name: str) -> Callable[..., Any]:
     call.__qualname__ = f"{method_name}_many"
     call.__doc__ = (
         f"Run `search.{method_name}` over a list of queries with bounded concurrency.\n\n"
-        f"Thin wrapper over `pplx_sdk.utils.fanout`. Reach for `fanout` directly\n"
+        f"Thin wrapper over `pplx_srch_sdk.utils.fanout`. Reach for `fanout` directly\n"
         f"when you need the same pattern against `content.snippets` or your own\n"
         f"async function.\n\n"
         f"Args:\n"
@@ -189,7 +189,7 @@ def _make_search_many(method_name: str) -> Callable[..., Any]:
         f"Note: spec dicts are shallow-copied; mutable values like `domains=[...]`\n"
         f"are stored by reference. Don't mutate spec values after dispatch.\n\n"
         f"Example:\n"
-        f"    hits = pplx_sdk.search.{method_name}_many(\n"
+        f"    hits = pplx_srch_sdk.search.{method_name}_many(\n"
         f"        ['query one', 'query two', 'query three'],\n"
         f"        concurrency=5,\n"
         f"        limit_per_query=10,   # each query returns up to 10 hits\n"
@@ -218,7 +218,7 @@ content = _SyncFacade(AsyncContentResource, lambda: _get_pplx_client().content)
 
 setattr(search, "web_many", _make_search_many("web"))
 
-sys.modules["pplx_sdk.search"] = search  # type: ignore[assignment]
-sys.modules["pplx_sdk.content"] = content  # type: ignore[assignment]
+sys.modules["pplx_srch_sdk.search"] = search  # type: ignore[assignment]
+sys.modules["pplx_srch_sdk.content"] = content  # type: ignore[assignment]
 
 atexit.register(_shutdown)

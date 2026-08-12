@@ -6,9 +6,9 @@ page snippets, backed by a Rust core with Python bindings via PyO3.
 
 Sync usage (recommended for scripts / pipelines / REPL):
 
-    >>> import pplx_sdk
-    >>> hits = pplx_sdk.search.web("Rust programming", limit=5)
-    >>> snippets = pplx_sdk.content.snippets("rust language", [h.url for h in hits])
+    >>> import pplx_srch_sdk
+    >>> hits = pplx_srch_sdk.search.web("Rust programming", limit=5)
+    >>> snippets = pplx_srch_sdk.content.snippets("rust language", [h.url for h in hits])
 
 ``search.web`` returns ``list[WebHit]``. ``content.snippets`` returns
 ``list[SnippetResult]``.
@@ -16,7 +16,7 @@ Sync usage (recommended for scripts / pipelines / REPL):
 Async usage (explicit concurrency control):
 
     >>> import asyncio
-    >>> from pplx_sdk import AsyncPplxClient
+    >>> from pplx_srch_sdk import AsyncPplxClient
     >>> async def main():
     ...     async with AsyncPplxClient() as client:
     ...         hits = await client.search.web("Rust programming", limit=10)

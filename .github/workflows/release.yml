@@ -40,7 +40,7 @@ jobs:
             echo "pplx_srch_sdk-${VERSION}-cp312-abi3-${t}.whl"
           done)
           for t in manylinux2014_x86_64 manylinux2014_aarch64 macosx_11_0_x86_64 macosx_11_0_arm64; do
-            unzip -p "staging/pplx_srch_sdk-${VERSION}-cp312-abi3-${t}.whl" pplx_sdk/pplx_sdk.abi3.so \
+            unzip -p "staging/pplx_srch_sdk-${VERSION}-cp312-abi3-${t}.whl" pplx_srch_sdk/pplx_sdk.abi3.so \
               | sha256sum | cut -d' ' -f1 \
               | diff - <(jq -r ".sha256s[\"$t\"]" bin/metadata.json)
           done
@@ -73,7 +73,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install "staging/pplx_srch_sdk-${{ needs.build.outputs.version }}-cp312-abi3-${{ matrix.tag }}.whl"
-      - run: python -c "import pplx_sdk; assert pplx_sdk.__version__ == '${{ needs.build.outputs.version }}', pplx_sdk.__version__"
+      - run: python -c "import pplx_srch_sdk; assert pplx_srch_sdk.__version__ == '${{ needs.build.outputs.version }}', pplx_srch_sdk.__version__"
 
   draft-release:
     needs: [build, smoke]

@@ -49,9 +49,9 @@ class PrebuiltCdylibHook(BuildHookInterface):
         if got != want:
             raise RuntimeError(f"{so} sha256 {got} != bin/metadata.json {want}")
 
-        shutil.copyfile(so, root / "src" / "pplx_sdk" / SO_NAME)
+        shutil.copyfile(so, root / "src" / "pplx_srch_sdk" / SO_NAME)
         build_data["pure_python"] = False
         build_data["tag"] = f"cp312-abi3-{plat}"
 
     def finalize(self, version: str, build_data: dict, artifact_path: str) -> None:
-        (Path(self.root) / "src" / "pplx_sdk" / SO_NAME).unlink(missing_ok=True)
+        (Path(self.root) / "src" / "pplx_srch_sdk" / SO_NAME).unlink(missing_ok=True)

@@ -5,14 +5,14 @@ a bounded asyncio Semaphore, isolates per-call errors into the returned
 result, and echoes the spec back next to each outcome so callers can attach
 provenance without inspecting results.
 
-This is the building block underneath `pplx_sdk.search.*_many(...)`. Reach
+This is the building block underneath `pplx_srch_sdk.search.*_many(...)`. Reach
 for it directly when you need fan-out for something that doesn't have a
 `_many` wrapper yet — `content.snippets` or your own async function.
 
 Example:
 
-    from pplx_sdk import AsyncPplxClient
-    from pplx_sdk.utils import fanout
+    from pplx_srch_sdk import AsyncPplxClient
+    from pplx_srch_sdk.utils import fanout
 
     async with AsyncPplxClient() as client:
         results = await fanout(
@@ -145,8 +145,8 @@ async def fanout(
         unaffected.
 
     Example:
-        from pplx_sdk import AsyncPplxClient
-        from pplx_sdk.utils import fanout
+        from pplx_srch_sdk import AsyncPplxClient
+        from pplx_srch_sdk.utils import fanout
 
         async with AsyncPplxClient() as client:
             batches = await fanout(
