@@ -36,6 +36,29 @@ for s in snippets:
 An async client with the same surface is available as
 `pplx_srch_sdk.AsyncPplxClient`.
 
+## Search filters and token budgets
+
+```python
+hits = pplx_srch_sdk.search.web(
+    "rust async runtimes",
+    published_after_date="3/1/2026",
+    published_before_date="3/5/2026",
+    updated_after_date="3/1/2026",
+    max_tokens=8000,
+    max_tokens_per_page=4000,
+)
+```
+
+Publication and last-updated bounds use `MM/DD/YYYY`; `updated_before_date`
+sets an upper last-updated bound. Use `recency_filter="hour"` (or `"day"`,
+`"week"`, `"month"`, `"year"`) for relative publication recency instead of
+`published_after_date` / `published_before_date`.
+
+`max_tokens` caps total search-result content tokens; `max_tokens_per_page`
+caps content tokens per result page. Omit `search_context_size` when passing
+explicit token budgets. Inspect `help(pplx_srch_sdk.search.web)` for all
+options supported by the installed version.
+
 ## Development
 
 The Python wrapper (`src/pplx_srch_sdk/`) is maintained in this repository; PRs
