@@ -10,7 +10,7 @@ Perplexity-internal source.
 pip install pplx-srch-sdk
 ```
 
-CPython 3.12+ on Linux (x86_64, aarch64) and macOS. The import name matches:
+CPython 3.12+ on Linux (x86_64, aarch64; glibc 2.28+) and macOS. The import name matches:
 `import pplx_srch_sdk`.
 
 ## Quick start

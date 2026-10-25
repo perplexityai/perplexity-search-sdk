@@ -14,8 +14,8 @@ from pathlib import Path
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 SUPPORTED = (
-    "manylinux2014_x86_64",
-    "manylinux2014_aarch64",
+    "manylinux_2_28_x86_64",
+    "manylinux_2_28_aarch64",
     "macosx_11_0_x86_64",
     "macosx_11_0_arm64",
 )
@@ -28,7 +28,7 @@ def _host_platform_tag() -> str:
     if sys.platform == "darwin":
         return "macosx_11_0_arm64" if arm else "macosx_11_0_x86_64"
     if sys.platform.startswith("linux"):
-        return "manylinux2014_aarch64" if arm else "manylinux2014_x86_64"
+        return "manylinux_2_28_aarch64" if arm else "manylinux_2_28_x86_64"
     raise RuntimeError(f"unsupported platform: {sys.platform}/{machine}")
 
 

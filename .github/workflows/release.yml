@@ -28,7 +28,7 @@ jobs:
       - name: Build 4 wheels
         run: |
           pip install build
-          for plat in manylinux2014_x86_64 manylinux2014_aarch64 macosx_11_0_x86_64 macosx_11_0_arm64; do
+          for plat in manylinux_2_28_x86_64 manylinux_2_28_aarch64 macosx_11_0_x86_64 macosx_11_0_arm64; do
             PPLX_SDK_PLATFORM=$plat python -m build --wheel --outdir staging .
           done
       - name: Verify wheel set against bin/metadata.json
@@ -36,10 +36,10 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          ls staging | LC_ALL=C sort | diff - <(for t in macosx_11_0_arm64 macosx_11_0_x86_64 manylinux2014_aarch64 manylinux2014_x86_64; do
+          ls staging | LC_ALL=C sort | diff - <(for t in macosx_11_0_arm64 macosx_11_0_x86_64 manylinux_2_28_aarch64 manylinux_2_28_x86_64; do
             echo "pplx_srch_sdk-${VERSION}-cp312-abi3-${t}.whl"
           done)
-          for t in manylinux2014_x86_64 manylinux2014_aarch64 macosx_11_0_x86_64 macosx_11_0_arm64; do
+          for t in manylinux_2_28_x86_64 manylinux_2_28_aarch64 macosx_11_0_x86_64 macosx_11_0_arm64; do
             unzip -p "staging/pplx_srch_sdk-${VERSION}-cp312-abi3-${t}.whl" pplx_srch_sdk/pplx_sdk.abi3.so \
               | sha256sum | cut -d' ' -f1 \
               | diff - <(jq -r ".sha256s[\"$t\"]" bin/metadata.json)
@@ -58,9 +58,9 @@ jobs:
         # No Intel-mac runner exists: macosx_11_0_x86_64 ships checksum-verified only.
         include:
           - runner: ubuntu-latest
-            tag: manylinux2014_x86_64
+            tag: manylinux_2_28_x86_64
           - runner: ubuntu-24.04-arm
-            tag: manylinux2014_aarch64
+            tag: manylinux_2_28_aarch64
           - runner: macos-15
             tag: macosx_11_0_arm64
     runs-on: ${{ matrix.runner }}
